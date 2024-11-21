@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        /* Располагаем калькулятор в левом верхнем углу */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #fff; /* Белый фон */
+        }
+
+        .calculator {
+            width: 240px; /* Немного уменьшили ширину */
+            border: 2px solid #007BFF; /* Голубая рамка */
+            border-radius: 5px;
+            background: #f9f9f9;
+            padding: 15px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Дисплей калькулятора */
+        .display {
+            width: calc(100% - 20px); /* С учётом padding */
+            height: 35px; /* Немного уменьшили высоту */
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: #fff;
+            text-align: left;
+            font-size: 1rem; /* Уменьшили шрифт */
+            padding: 5px 10px;
+            margin-bottom: 10px;
+            color: #333;
+            overflow: hidden; /* Скрываем лишний текст */
+        }
+
+        .display span {
+            font-weight: normal; /* Обычный текст для всей строки */
+            color: #666; /* Блеклый цвет для предыдущих элементов */
+        }
+
+        .display span.active {
+            font-weight: bold; /* Жирный шрифт для активного элемента */
+            color: #000; /* Яркий цвет */
+        }
+
+        /* Кнопки */
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* Сетка 4x4 */
+            gap: 5px;
+        }
+
+        .button {
+            height: 50px;
+            font-size: 1.1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: linear-gradient(to bottom, #f1f1f1, #d6d6d6); /* Выпуклость */
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Тень для выпуклости */
+            cursor: pointer;
+            text-align: center;
+            line-height: 50px;
+            transition: all 0.2s;
+        }
+
+        /* Эффекты при наведении */
+        .button:hover {
+            background: #e0e0e0;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2); /* Увеличение тени */
+        }
+
+        /* При нажатии */
+        .button:active {
+            background: #c0c0c0;
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Убираем выделение цвета для C и = */
+        .button.clear,
+        .button.equal {
+            background: linear-gradient(to bottom, #f1f1f1, #d6d6d6); /* Как у остальных кнопок */
+            color: #000; /* Обычный цвет текста */
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <!-- Дисплей -->
+        <div class="display" id="display"></div>
+        <!-- Кнопки -->
+        <div class="buttons">
+            <button class="button" onclick="appendNumber('7')">7</button>
+            <button class="button" onclick="appendNumber('8')">8</button>
+            <button class="button" onclick="appendNumber('9')">9</button>
+            <button class="button" onclick="setOperator('/')">/</button>
+            <button class="button" onclick="appendNumber('4')">4</button>
+            <button class="button" onclick="appendNumber('5')">5</button>
+            <button class="button" onclick="appendNumber('6')">6</button>
+            <button class="button" onclick="setOperator('*')">*</button>
+            <button class="button" onclick="appendNumber('1')">1</button>
+            <button class="button" onclick="appendNumber('2')">2</button>
+            <button class="button" onclick="appendNumber('3')">3</button>
+            <button class="button" onclick="setOperator('-')">-</button>
+            <button class="button" onclick="appendNumber('0')">0</button>
+            <button class="button" onclick="appendDecimal()">.</button>
+            <button class="button" onclick="setOperator('+')">+</button>
+            <button class="button equal" onclick="calculate()">=</button>
+            <button class="button clear" onclick="clearDisplay()">C</button>
+        </div>
+    </div>
+
+    <script>
+        let expression = ''; // Полное выражение
+        let currentElement = ''; // Текущий элемент (число или оператор)
+
+        const display = document.getElementById('display');
+
+        // Обновляем дисплей
+        function updateDisplay() {
+            display.innerHTML = ''; // Очистить дисплей
+            const elements = expression.split(' '); // Разбиваем выражение на элементы
+            elements.forEach((el, index) => {
+                const span = document.createElement('span');
+                span.textContent = el;
+                if (index === elements.length - 1) {
+                    span.classList.add('active'); // Выделяем последний элемент
+                }
+                display.appendChild(span);
+                display.innerHTML += ' '; // Пробел между элементами
+            });
+        }
+
+        // Добавляем число
+        function appendNumber(number) {
+            currentElement += number;
+            expression = expression.trim() + number; // Добавляем в строку
+            updateDisplay();
+        }
+
+        // Добавляем десятичную точку
+        function appendDecimal() {
+            if (!currentElement.includes('.')) {
+                currentElement += '.';
+                expression = expression.trim() + '.';
+                updateDisplay();
+            }
+        }
+
+        // Устанавливаем оператор
+        function setOperator(op) {
+            if (currentElement === '') return; // Если ничего не введено, ничего не делаем
+            expression += ` ${op} `; // Добавляем оператор с пробелами
+            currentElement = ''; // Очищаем текущий элемент
+            updateDisplay();
+        }
+
+        // Вычисляем результат
+        function calculate() {
+            try {
+                const result = eval(expression); // Используем eval для вычисления
+                expression = result.toString(); // Записываем результат
+                currentElement = result.toString(); // Сохраняем результат как текущий элемент
+                updateDisplay();
+            } catch {
+                expression = 'Error'; // Если ошибка
+                currentElement = '';
+                updateDisplay();
+            }
+        }
+
+        // Очищаем дисплей
+        function clearDisplay() {
+            expression = '';
+            currentElement = '';
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
